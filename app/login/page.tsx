@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { toast } from "@/components/ui/use-toast" // Asumiendo que tienes un componente de toast
 
 export default function LoginPage() {
   const [userId, setUserId] = useState("")
@@ -21,12 +22,15 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // Simular un delay de red
-      await new Promise((resolve) => setTimeout(resolve, 1000))
       await login(userId)
       router.push("/dashboard")
     } catch (error) {
       console.error("Error al iniciar sesión:", error)
+      toast({
+        title: "Error de inicio de sesión",
+        description: error instanceof Error ? error.message : "Usuario no encontrado o credenciales inválidas",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }

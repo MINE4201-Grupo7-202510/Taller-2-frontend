@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { User } from "@/lib/types"
-import { mockUsers } from "@/lib/mocks"
 import { delay } from "@/lib/utils"
 
 interface AuthContextType {
@@ -27,17 +26,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const storedUserId = localStorage.getItem("userId")
         if (storedUserId) {
-          // Simular delay de red
-          await delay(800)
+          // Obtener el usuario de la API
+          const response = await fetch('/api/auth', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: storedUserId }),
+          });
 
-          // Buscar el usuario en los mocks
-          const foundUser = mockUsers.find((u) => u.user_id === storedUserId)
-          if (foundUser) {
-            setUser(foundUser)
+          if (!response.ok) {
+            throw new Error('Error al recuperar sesión');
           }
+
+          const data = await response.json();
+          setUser(data.user);
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Error desconocido"))
+        // Si hay error al recuperar el usuario, limpiamos localStorage
+        localStorage.removeItem("userId")
       } finally {
         setIsLoading(false)
       }
@@ -51,30 +59,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     try {
-      // Simular delay de red
-      await delay(1000)
+      // Simular delay de red para mejorar UX
+      await delay(300)
 
-      // Buscar un usuario por ID exacto
-      const foundUser = mockUsers.find((u) => u.user_id === userId)
+      console.log('Intentando login con ID:', userId);
 
-      if (!foundUser) {
-        throw new Error("Usuario no encontrado")
+      // Llamar a la API para autenticar al usuario
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Error de respuesta:', response.status, data);
+        throw new Error(data.error || `Error al iniciar sesión (${response.status})`);
       }
 
+      console.log('Usuario autenticado:', data.user);
+
       // Guardar en localStorage
-      localStorage.setItem("userId", foundUser.user_id)
-      setUser(foundUser)
+      localStorage.setItem("userId", data.user.user_id);
+      setUser(data.user);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Error desconocido"))
-      throw err
+      console.error('Error durante login:', err);
+      setError(err instanceof Error ? err : new Error("Error desconocido"));
+      throw err;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   const logout = () => {
-    localStorage.removeItem("userId")
-    setUser(null)
+    localStorage.removeItem("userId");
+    setUser(null);
   }
 
   return <AuthContext.Provider value={{ user, isLoading, error, login, logout }}>{children}</AuthContext.Provider>
