@@ -1,56 +1,63 @@
+// filepath: lib/hooks/useBusiness.tsx
 "use client"
 
 import { useState, useEffect } from "react"
-import type { Business } from "@/lib/types"
-import { mockBusinesses } from "@/lib/mocks"
-import { delay } from "@/lib/utils"
+import type { ApiContexts } from "@/lib/types" // Use the new type
 
-export function useBusiness(businessId?: string) {
-  const [business, setBusiness] = useState<Business | null>(null)
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+export function useBusiness() {
+  const [cities, setCities] = useState<string[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [dayPeriods, setDayPeriods] = useState<string[]>(['morning', 'afternoon', 'evening', 'night']) // Default or fetch
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  // Obtener ciudades y categorías únicas de los negocios
-  const cities = Array.from(new Set(mockBusinesses.map((b) => b.city)))
-  const categories = Array.from(new Set(mockBusinesses.flatMap((b) => b.categories)))
-
   useEffect(() => {
-    if (!businessId) {
-      setIsLoading(false)
-      return
-    }
-
-    const fetchBusiness = async () => {
+    const fetchContexts = async () => {
       setIsLoading(true)
       setError(null)
+      if (!API_URL) {
+        setError(new Error("API URL not configured."))
+        setIsLoading(false)
+        return
+      }
 
       try {
-        // Simular delay de red
-        await delay(1000)
-
-        // Buscar el negocio en los mocks
-        const foundBusiness = mockBusinesses.find((b) => b.business_id === businessId)
-
-        if (!foundBusiness) {
-          throw new Error("Negocio no encontrado")
+        const response = await fetch(`${API_URL}/available-contexts`)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch contexts: ${response.statusText}`)
         }
+        const data: ApiContexts = await response.json()
 
-        setBusiness(foundBusiness)
+        // Sort alphabetically for better UX in dropdowns
+        setCities(data.cities.sort() || [])
+        setCategories(data.categories.sort() || [])
+        // If your API returns day_periods, use data.day_periods
+        // setDayPeriods(data.day_periods.sort() || [])
+
       } catch (err) {
-        setError(err instanceof Error ? err : new Error("Error desconocido"))
+        console.error("Error fetching contexts:", err)
+        setError(err instanceof Error ? err : new Error("Failed to load context data"))
+        // Provide default values or keep empty on error?
+        setCities([])
+        setCategories([])
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchBusiness()
-  }, [businessId])
+    fetchContexts()
+  }, [])
+
+  // Removed the single business fetching logic as it's not used in the dashboard
+  // and the backend endpoint wasn't specified for it.
 
   return {
-    business,
-    isLoading,
-    error,
     cities,
     categories,
+    dayPeriods, // Return day periods as well
+    isLoading,
+    error,
   }
 }

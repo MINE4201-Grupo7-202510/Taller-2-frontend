@@ -15,7 +15,7 @@ export interface Business {
   attributes?: Record<string, any>
   categories: string[]
   hours?: Record<string, string>
-  photos: Photo[]
+  photos?: Photo[]
 }
 
 export interface Review {
@@ -112,4 +112,45 @@ export interface ExperimentMetrics {
     category: string
     value: number
   }>
+}
+
+
+// Define the structure for the explanation object from the API
+export interface RecommendationExplanation {
+  SVD?: string;
+  KNN?: string;
+  Contextual?: string;
+  weights?: {
+    w_svd: number;
+    w_knn: number;
+    w_context: number;
+  };
+  // Keep the old structure optionally if needed elsewhere, or remove if fully migrating
+  factors?: { name: string; weight: number; description: string }[];
+  text?: string;
+}
+
+
+// Define the structure for a single recommendation item from the API
+export interface ApiRecommendation {
+  business_id: string;
+  name: string;
+  address: string;
+  categories: string; // Comma-separated string from API
+  overall_stars: number;
+  score_svd: number;
+  score_knn: number;
+  score_contextual: number;
+  final_score: number;
+  explanation: RecommendationExplanation;
+  // Add optional userFeedback if you manage it client-side
+  userFeedback?: boolean | null;
+}
+
+
+// Define the structure for the available contexts from the API
+export interface ApiContexts {
+  cities: string[];
+  categories: string[];
+  day_periods: string[]; // Assuming the API returns this too
 }
