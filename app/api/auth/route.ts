@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { getDbPool } from '@/lib/db';
 
 export async function POST(request: Request) {
-  try {
-    const { userId } = await request.json();
-
-    // Validar que userId existe
-    if (!userId) {
-      return NextResponse.json({ error: 'ID de usuario requerido' }, { status: 400 });
-    }
-
-    console.log('Buscando usuario con ID:', userId);
-
-    // Consultar el usuario en la base de datos
-    const userQuery = await pool.query(
-      `SELECT user_id, name, review_count, yelping_since, useful, funny, cool, elite, friends, fans, average_stars FROM yelp_user WHERE user_id = $1`,
-      [userId]
-    );
+    try {
+      const { userId } = await request.json();
+  
+      if (!userId) {
+        return NextResponse.json({ error: 'ID de usuario requerido' }, { status: 400 });
+      }
+  
+      console.log('Buscando usuario con ID:', userId);
+  
+      const pool = getDbPool(); // <- Asegúrate de obtener el pool aquí
+  
+      const userQuery = await pool.query(
+        `SELECT user_id, name, review_count, yelping_since, useful, funny, cool, elite, friends, fans, average_stars FROM yelp_user WHERE user_id = $1`,
+        [userId]
+      );
 
     console.log('Resultado de la consulta:', userQuery.rows.length > 0 ? 'Usuario encontrado' : 'Usuario no encontrado');
 

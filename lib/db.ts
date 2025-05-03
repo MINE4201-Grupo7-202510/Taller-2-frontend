@@ -1,12 +1,17 @@
+// filepath: c:\Users\Elkur\OneDrive\Documentos\Programacion\Universidad\Sistemas_de_recomendacion\Taller2\Taller2_MINE4201_front\lib\db.ts
 import { Pool } from 'pg';
 
-// Configuración de la conexión a la base de datos
-const pool = new Pool({
-  user: process.env.DB_USER || 'user_yelp',
-  password: process.env.DB_PASSWORD || 'password1234',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'db_yelp',
-});
+export let pool: Pool;
 
-export { pool };
+export function getDbPool() {
+  if (!pool) {
+    pool = new Pool({
+      user: process.env.PGUSER || 'user_yelp',
+      host: process.env.PGHOST || 'localhost', // Ajusta si tu DB está en otro host
+      database: process.env.PGDATABASE || 'db_yelp',
+      password: process.env.PGPASSWORD || 'password1234',
+      port: parseInt(process.env.PGPORT || '5432', 10), // Puerto estándar de Postgres
+    });
+  }
+  return pool;
+}

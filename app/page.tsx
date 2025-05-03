@@ -15,9 +15,9 @@ export default function Home() {
         <Button asChild size="lg">
           <Link href="/login">Ingresar</Link>
         </Button>
-        <Button asChild variant="outline" size="lg">
+        {/* <Button asChild variant="outline" size="lg">
           <Link href="/experiments">Ver Experimentos</Link>
-        </Button>
+        </Button> */}
       </div>
     </div>
   )

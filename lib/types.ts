@@ -1,39 +1,45 @@
 // Tipos para el dataset de Yelp
 
+export interface Photo {
+  photo_id: string;
+  caption?: string | null; // Hacer opcional y permitir null si la DB lo permite
+  label?: string | null;   // Hacer opcional y permitir null si la DB lo permite
+}
+
 export interface Business {
-  business_id: string
-  name: string
-  address: string
-  city: string
-  state: string
-  postal_code: string
-  latitude: number
-  longitude: number
-  stars: number
-  review_count: number
-  is_open: number
-  attributes?: Record<string, any>
-  categories: string[]
-  hours?: Record<string, string>
-  photos?: Photo[]
+  business_id: string;
+  name: string | null; // Permitir null si la DB lo permite
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  postal_code: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  stars: number | null;
+  review_count: number | null;
+  is_open: boolean | null; // Cambiado a boolean
+  attributes?: Record<string, any> | null; // Permitir null
+  categories: string[]; // Se mantendrá como string[] después de parsear
+  hours?: Record<string, string> | null; // Permitir null
+  photos?: Photo[]; // Usar la interfaz Photo definida arriba
 }
 
 export interface Review {
-  review_id: string
-  user_id: string
-  business_id: string
-  stars: number
-  date: string
-  text: string
-  useful: number
-  funny: number
-  cool: number
-  user: User
+  review_id: string;
+  user_id: string;
+  business_id: string;
+  stars: number | null;
+  date: string; // O Date si prefieres convertirlo
+  text: string | null;
+  useful: number | null;
+  funny: number | null;
+  cool: number | null;
+  user: User; // Incluir información del usuario
 }
 
 export interface User {
   user_id: string
-  name: string
+  name: string | null
   review_count: number
   yelping_since: string
   friends: string[]
@@ -72,8 +78,8 @@ export interface Tip {
 export interface Photo {
   photo_id: string
   business_id: string
-  caption?: string
-  label?: string
+  caption?: string | null
+  label?: string | null
   url: string
 }
 
@@ -152,5 +158,5 @@ export interface ApiRecommendation {
 export interface ApiContexts {
   cities: string[];
   categories: string[];
-  day_periods: string[]; // Assuming the API returns this too
+  day_periods?: string[]; // Assuming the API returns this too
 }

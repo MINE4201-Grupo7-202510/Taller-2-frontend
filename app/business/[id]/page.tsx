@@ -1,258 +1,90 @@
-"use client"
+// filepath: c:\Users\Elkur\OneDrive\Documentos\Programacion\Universidad\Sistemas_de_recomendacion\Taller2\Taller2_MINE4201_front\app\business\[id]\page.tsx
+import { getBusinessById, getReviewsByBusinessId } from '@/lib/data'; // Ajusta la ruta
+import { BusinessCard } from '@/components/business-card'; // Ajusta la ruta
+// Importa un componente para mostrar reseñas (necesitarás crearlo o adaptarlo)
+import { ReviewList } from '@/components/review-list';
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 
-import { useState, useEffect } from "react"
-import { useBusiness } from "@/lib/hooks/useBusiness"
-import { useReviews } from "@/lib/hooks/useReviews"
-import { BusinessCard } from "@/components/business-card"
-import { RatingStars } from "@/components/rating-stars"
-import { MapPreview } from "@/components/map-preview"
-import { LoadingSkeleton } from "@/components/loading-skeleton"
-import { ErrorState } from "@/components/error-state"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { formatDate } from "@/lib/utils"
-import type { Review } from "@/lib/types"
-import Image from "next/image"
+interface BusinessPageProps {
+  params: { id: string };
+}
 
-export default function BusinessPage({ params }: { params: { id: string } }) {
-  const { id } = params
-  const { business, isLoading: businessLoading, error: businessError } = useBusiness(id)
-  const { reviews, isLoading: reviewsLoading, error: reviewsError } = useReviews(id)
-
-  const [currentPage, setCurrentPage] = useState(1)
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
-  const reviewsPerPage = 3
-
-  const [paginatedReviews, setPaginatedReviews] = useState<Review[]>([])
-  const [totalPages, setTotalPages] = useState(1)
-
-  useEffect(() => {
-    if (!reviews) return
-
-    const start = (currentPage - 1) * reviewsPerPage
-    const end = start + reviewsPerPage
-    setPaginatedReviews(reviews.slice(start, end))
-    setTotalPages(Math.ceil(reviews.length / reviewsPerPage))
-  }, [reviews, currentPage])
-
-  const nextPhoto = () => {
-    if (!business) return
-    setCurrentPhotoIndex((prev) => (prev + 1) % business.photos.length)
+// Generar metadatos dinámicos (opcional pero bueno para SEO)
+export async function generateMetadata({ params }: BusinessPageProps): Promise<Metadata> {
+  const business = await getBusinessById(params.id);
+  if (!business) {
+    return { title: 'Negocio no encontrado' };
   }
+  return {
+    title: business.name || 'Detalles del Negocio',
+    description: `Información detallada y reseñas para ${business.name}`,
+  };
+}
 
-  const prevPhoto = () => {
-    if (!business) return
-    setCurrentPhotoIndex((prev) => (prev - 1 + business.photos.length) % business.photos.length)
-  }
+export default async function BusinessPage({ params }: BusinessPageProps) {
+  const businessId = params.id;
 
-  if (businessLoading || reviewsLoading) {
-    return (
-      <div className="space-y-8">
-        <LoadingSkeleton type="business" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <LoadingSkeleton type="map" />
-          <div className="space-y-4">
-            <LoadingSkeleton type="text" count={3} />
-          </div>
-        </div>
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Reseñas</h2>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <LoadingSkeleton key={i} type="review" />
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // Fetch de datos en paralelo
+  const [business, reviews] = await Promise.all([
+    getBusinessById(businessId),
+    getReviewsByBusinessId(businessId)
+  ]);
 
-  if (businessError || reviewsError || !business) {
-    return <ErrorState message="No pudimos cargar la información del negocio. Por favor, intenta de nuevo más tarde." />
+  // Si el negocio no se encuentra, muestra página 404
+  if (!business) {
+    notFound();
   }
 
   return (
-    <div className="space-y-8">
-      <BusinessCard business={business} detailed />
+    <div className="container mx-auto p-4 space-y-8">
+      {/* Usa BusinessCard en modo detallado */}
+      <BusinessCard business={business} detailed={true} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="relative aspect-video rounded-lg overflow-hidden">
-          {business.photos.length > 0 ? (
-            <>
-              <Image
-                src={business.photos[currentPhotoIndex].url || "/placeholder.svg"}
-                alt={business.photos[currentPhotoIndex].caption || business.name}
-                fill
-                className="object-cover"
-              />
-              {business.photos.length > 1 && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full"
-                    onClick={prevPhoto}
-                    aria-label="Foto anterior"
-                  >
-                    &lt;
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full"
-                    onClick={nextPhoto}
-                    aria-label="Siguiente foto"
-                  >
-                    &gt;
-                  </Button>
-                  <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
-                    {business.photos.map((_, index) => (
-                      <div
-                        key={index}
-                        className={`w-2 h-2 rounded-full ${index === currentPhotoIndex ? "bg-white" : "bg-white/50"}`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-              <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-sm">
-                {business.photos[currentPhotoIndex].caption || `Foto de ${business.name}`}
+      {/* Sección de Fotos (Ejemplo básico) */}
+      {business.photos && business.photos.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-2xl font-semibold mb-4">Fotos</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {business.photos.map((photo) => (
+              <div key={photo.photo_id} className="relative aspect-square">
+                 {/* Asume que las fotos están en public/photos/ */}
+                 <img
+                    src={`/photos/${photo.photo_id}.jpg`}
+                    alt={photo.caption || `Foto de ${business.name}`}
+                    className="object-cover w-full h-full rounded-md"
+                    loading="lazy" // Carga diferida para mejorar rendimiento
+                 />
+                 {photo.caption && (
+                    <p className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 truncate">
+                        {photo.caption}
+                    </p>
+                 )}
               </div>
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-full bg-muted">No hay fotos disponibles</div>
-          )}
-        </div>
-
-        <div>
-          <Tabs defaultValue="info">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="info">Información</TabsTrigger>
-              <TabsTrigger value="hours">Horarios</TabsTrigger>
-            </TabsList>
-            <TabsContent value="info" className="space-y-4 mt-4">
-              <div>
-                <h3 className="font-medium">Dirección</h3>
-                <p className="text-muted-foreground">{business.address}</p>
-                <p className="text-muted-foreground">
-                  {business.city}, {business.state} {business.postal_code}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-medium">Categorías</h3>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {business.categories.map((category) => (
-                    <span
-                      key={category}
-                      className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-sm"
-                    >
-                      {category}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h3 className="font-medium">Calificación</h3>
-                <div className="flex items-center gap-2">
-                  <RatingStars rating={business.stars} />
-                  <span className="text-muted-foreground">({business.review_count} reseñas)</span>
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="hours" className="mt-4">
-              <Card>
-                <CardContent className="pt-6">
-                  {business.hours ? (
-                    <div className="space-y-2">
-                      {Object.entries(business.hours).map(([day, hours]) => (
-                        <div key={day} className="flex justify-between">
-                          <span className="font-medium">{getDayName(day)}</span>
-                          <span>{hours}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No hay información de horarios disponible</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-
-          <div className="mt-6">
-            <h3 className="font-medium mb-4">Ubicación</h3>
-            <MapPreview latitude={business.latitude} longitude={business.longitude} name={business.name} />
+            ))}
           </div>
         </div>
+      )}
+
+      {/* Sección de Reseñas */}
+      <div className="mt-6">
+         <h2 className="text-2xl font-semibold mb-4">Reseñas ({reviews.length})</h2>
+         {/* Renderiza las reseñas usando un componente dedicado */}
+         <ReviewList reviews={reviews} />
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Reseñas</h2>
-
-        {paginatedReviews.length > 0 ? (
-          <>
-            <div className="space-y-6">
-              {paginatedReviews.map((review) => (
-                <div key={review.review_id} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium">{review.user.name}</div>
-                      <div className="text-sm text-muted-foreground">{formatDate(review.date)}</div>
-                    </div>
-                    <RatingStars rating={review.stars} />
-                  </div>
-                  <Separator className="my-3" />
-                  <p className="text-sm">{review.text}</p>
-                  <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
-                    <span>Útil: {review.useful}</span>
-                    <span>Divertido: {review.funny}</span>
-                    <span>Cool: {review.cool}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-between items-center mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Anterior
-              </Button>
-              <span>
-                Página {currentPage} de {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-              >
-                Siguiente
-              </Button>
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No hay reseñas disponibles para este negocio</p>
-          </div>
-        )}
-      </div>
     </div>
-  )
+  );
 }
 
-function getDayName(day: string): string {
-  const days: Record<string, string> = {
-    Monday: "Lunes",
-    Tuesday: "Martes",
-    Wednesday: "Miércoles",
-    Thursday: "Jueves",
-    Friday: "Viernes",
-    Saturday: "Sábado",
-    Sunday: "Domingo",
-  }
-  return days[day] || day
-}
+// Opcional: Si quieres que las páginas se generen estáticamente en build time
+// export async function generateStaticParams() {
+//   // Aquí podrías obtener todos los business_id de tu base de datos
+//   // const pool = getDbPool();
+//   // const res = await pool.query('SELECT business_id FROM business');
+//   // return res.rows.map((row) => ({ id: row.business_id }));
+//   return []; // Devuelve vacío si no quieres pre-generar ninguna
+// }
+
+// Opcional: Revalidación bajo demanda o basada en tiempo si los datos cambian
+// export const revalidate = 3600; // Revalidar cada hora, por ejemplo

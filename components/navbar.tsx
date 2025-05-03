@@ -22,8 +22,8 @@ export function Navbar() {
   const routes = [
     { href: "/", label: "Inicio", public: true },
     { href: "/dashboard", label: "Dashboard", public: false },
-    { href: "/profile", label: "Perfil", public: false },
-    { href: "/experiments", label: "Experimentos", public: true },
+    //{ href: "/profile", label: "Perfil", public: false },
+    //{ href: "/experiments", label: "Experimentos", public: true },
   ]
 
   const filteredRoutes = routes.filter((route) => route.public || user)

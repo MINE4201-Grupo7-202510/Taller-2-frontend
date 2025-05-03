@@ -69,7 +69,7 @@ export function RecommendationCard({ recommendation, onFeedback }: Recommendatio
       </CardContent>
       <CardFooter className="flex flex-col gap-3 pt-4"> {/* Add padding top */}
          {/* Pass business_id to FeedbackButtons */}
-        <FeedbackButtons id={business_id} onFeedback={onFeedback} currentFeedback={userFeedback} />
+        {/* <FeedbackButtons id={business_id} onFeedback={onFeedback} currentFeedback={userFeedback} /> */}
         <Button asChild className="w-full">
           {/* Link using business_id */}
           <Link href={`/business/${business_id}`}>Ver Negocio</Link>
