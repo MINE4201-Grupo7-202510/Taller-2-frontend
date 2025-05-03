@@ -1,117 +1,143 @@
-# Sistema de Recomendación Híbrido - Yelp Dataset
+**Next.js Project**
 
-Este proyecto es una aplicación académica para un sistema de recomendación híbrido basado en el Yelp Dataset. La aplicación está construida con Next.js (App Router), React, TypeScript y Tailwind CSS.
+Este repositorio contiene una aplicación web basada en Next.js. A continuación se explica cómo configurar y ejecutar el proyecto localmente.
 
-## Características
+---
 
-- Interfaz de usuario moderna y responsive
-- Modo oscuro/claro con persistencia en localStorage
-- Visualización de recomendaciones con explicaciones
-- Filtrado por ciudad y categoría
-- Detalles de negocios con mapas, fotos y reseñas
-- Gráficos de métricas de experimentos
-- Accesibilidad WCAG 2.1 AA
+## 🔧 Requisitos Previos
 
-## Estructura del Proyecto
+* **Node.js 14+** y **npm** (o **Yarn**) instalados.
 
-\`\`\`
-root/
-├─ app/ - rutas Next.js (App Router)
-├─ components/ - UI genérica
-├─ lib/ - lógica de la aplicación
-│ ├─ hooks/ - hooks personalizados
-│ ├─ mocks.ts - datos estáticos
-│ ├─ types.ts - tipos TypeScript
-│ └─ utils.ts - utilidades
-├─ styles/ - estilos globales
-├─ public/ - assets estáticos
-└─ tests/ - pruebas
-\`\`\`
+  ```bash
+  node --version
+  npm --version
+  ```
+* **Git** (opcional) para clonar el repositorio.
 
-## Requisitos
+---
 
-- Node.js 18.x o superior
-- npm o yarn
+## 📁 Clonar el Repositorio
 
-## Instalación
+```bash
+git clone https://github.com/tu-usuario/nextjs-app.git
+cd nextjs-app
+```
 
-1. Clona el repositorio:
+También puedes descargar el ZIP desde GitHub y descomprimirlo.
 
-\`\`\`bash
-git clone https://github.com/tu-usuario/yelp-recommendation-system.git
-cd yelp-recommendation-system
-\`\`\`
+---
 
-2. Instala las dependencias:
+## 🗄️ Configurar Variables de Entorno
 
-\`\`\`bash
+Crea un archivo `.env.local` en la raíz con el formato:
+
+```ini
+# filepath: .env.local
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+> Asegúrate de no subir este archivo a repositorios públicos.
+
+---
+
+## 📦 Instalación de Dependencias
+
+Con npm:
+
+```bash
 npm install
-# o
+```
+
+O con Yarn:
+
+```bash
 yarn install
-\`\`\`
+```
 
-## Ejecución
+---
 
-### Desarrollo
+## 🚀 Modo Desarrollo
 
-Para ejecutar el servidor de desarrollo:
+Inicia el servidor de desarrollo con:
 
-\`\`\`bash
+```bash
 npm run dev
 # o
 yarn dev
-\`\`\`
+```
 
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
+Abre en tu navegador `http://localhost:3000`. Cualquier cambio en el código recargará la página automáticamente.
 
-### Producción
+---
 
-Para construir la aplicación para producción:
+## 📦 Construir y Desplegar
 
-\`\`\`bash
-npm run build
-# o
-yarn build
-\`\`\`
+1. **Construir la aplicación**:
 
-Para iniciar el servidor de producción:
+   ```bash
+   npm run build
+   # o
+   yarn build
+   ```
+2. **Iniciar en modo producción**:
 
-\`\`\`bash
-npm run start
-# o
-yarn start
-\`\`\`
+   ```bash
+   npm start
+   # o
+   yarn start
+   ```
 
-## Pruebas
+Por defecto el servidor de producción corre en `http://localhost:3000`.
 
-Para ejecutar las pruebas:
+---
 
-\`\`\`bash
-npm run test
-# o
-yarn test
-\`\`\`
+## 🛠️ Scripts Disponibles
 
-## Linting
+Dentro de `package.json` encontrarás los siguientes comandos:
 
-Para ejecutar el linter:
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest"
+  }
+}
+```
 
-\`\`\`bash
-npm run lint
-# o
-yarn lint
-\`\`\`
+* `dev`: ejecuta Next.js en modo desarrollo.
+* `build`: compila la app para producción.
+* `start`: inicia la app compilada.
+* `lint`: corre ESLint.
+* `test`: ejecuta pruebas unitarias (si existen).
 
-## Notas Importantes
+---
 
-- Todos los datos son estáticos (mocks) y se encuentran en `lib/mocks.ts`
-- La aplicación está estructurada para facilitar la futura integración con un backend real
-- Los hooks abstraen la lógica de acceso a datos para que sea fácil reemplazar los mocks por llamadas API reales
+## 🗂️ Estructura del Proyecto
 
-## Páginas Principales
+```
+nextjs-app/
+├── pages/          # Rutas y páginas de Next.js
+├── public/         # Archivos estáticos
+├── components/     # Componentes React reutilizables
+├── styles/         # Estilos CSS/SCSS
+├── lib/            # Lógica externa (API, utilidades)
+├── middleware.js   # Middleware global
+├── next.config.js  # Configuración de Next.js
+├── package.json    # Dependencias y scripts
+└── .env.local      # Variables de entorno (no versionar)
+```
 
-- `/` - Landing estática
-- `/login` - Formulario de inicio de sesión
-- `/dashboard` - Lista de recomendaciones con filtros
-- `/business/[id]` - Detalle de negocio
-- `/
+---
+
+## 🖼️ Documentación y Recursos
+
+* **Next.js Docs**: [https://nextjs.org/docs](https://nextjs.org/docs)
+* **React**: [https://reactjs.org/docs/getting-started.html](https://reactjs.org/docs/getting-started.html)
+* **Vercel Deploy**: [https://vercel.com/docs](https://vercel.com/docs)
+
+---
+
+¡Con esto ya tienes todo lo necesario para poner en marcha el proyecto de Next.js! 🚀
